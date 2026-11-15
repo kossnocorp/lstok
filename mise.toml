@@ -1,7 +1,8 @@
 [tools]
 node = "latest"
-oxfmt = "latest"
 pnpm = "latest"
+oxfmt = "latest"
+fnox = "latest"
 
 [tasks.build]
 run = "pnpm exec jsd build"
@@ -23,3 +24,49 @@ run = "pnpm exec vitest"
 
 [tasks.typecheck]
 run = "pnpm exec tsc --noEmit"
+
+[tasks."publish:next"]
+run = [{ task = "publish", args = ["--next"] }]
+
+[tasks.publish]
+depends = ["build"]
+usage = '''
+flag "--next" help="Tag package as next"
+'''
+run = '''
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+echo
+echo "🚧 Publishing package to npm"
+echo
+
+NPM_TOKEN=$(fnox get NPM_TOKEN)
+if [ -z "$NPM_TOKEN" ]; then
+  echo "🔴 NPM_TOKEN env var is not set! Do you have fnox access configured?"
+  exit 1
+fi
+
+PNPM_CONFIG__AUTH="{\"https://registry.npmjs.org\":{\"@\":{\"authToken\":\"$NPM_TOKEN\"}}}"
+
+build_args=(--dir dist --access public --no-git-checks)
+
+if [ "${usage_next:-false}" = "true" ]; then
+  echo "🔵 Tag: next"
+  build_args+=(--next)
+else
+  echo "🔵 Tag: latest"
+fi
+
+echo
+echo "🌀 Running \`pnpm publish\`:"
+echo "........................................................................."
+PNPM_CONFIG__AUTH=$PNPM_CONFIG__AUTH pnpm publish "${build_args[@]}"
+echo "........................................................................."
+echo "🟢 Publish completed"
+
+echo
+echo "🎉 Successfully published package to npm"
+echo
+'''
