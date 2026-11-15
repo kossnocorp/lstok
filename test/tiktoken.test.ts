@@ -1,0 +1,50 @@
+import { writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { describe, expect, it } from "vitest";
+import { parseArguments } from "../src/args.ts";
+import { countTokens } from "../src/count.ts";
+import { runCli, temporaryDirectory } from "./helpers.ts";
+
+describe("tiktoken", () => {
+  const directory = temporaryDirectory();
+
+  it("defaults to o200k_base and supports both encoding spellings", () => {
+    expect(parseArguments(["AGENTS.md"])).toEqual({
+      mode: "file",
+      file: "AGENTS.md",
+      encoding: "o200k_base",
+    });
+
+    for (const flag of ["--encoding", "--econding"])
+      expect(parseArguments(["AGENTS.md", flag, "cl100k_base"])).toHaveProperty(
+        "encoding",
+        "cl100k_base",
+      );
+  });
+
+  it("counts empty, ASCII, Unicode, and special-token-looking text", () => {
+    expect(countTokens("")).toBe(0);
+    expect(countTokens("hello world")).toBe(2);
+    expect(countTokens("お誕生日おめでとう", "o200k_base")).toBe(8);
+    expect(countTokens("お誕生日おめでとう", "cl100k_base")).toBe(9);
+    expect(countTokens("<|endoftext|>")).toBeGreaterThan(1);
+  });
+
+  it("rejects unsupported encodings", () => {
+    expect(() => countTokens("hello", "invalid")).toThrow();
+  });
+
+  it("prints only the file token count and errors on missing files", () => {
+    const file = join(directory, "file with spaces.md");
+
+    writeFileSync(file, "hello world");
+
+    expect(runCli([file]).stdout).toBe("2\n");
+
+    const result = runCli([join(directory, "missing")]);
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain("lstok:");
+    expect(result.stdout).toBe("");
+  });
+});

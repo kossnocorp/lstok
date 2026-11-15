@@ -13,6 +13,26 @@
   ],
   "license": "MIT",
   "author": "Sasha Koss <koss@nocorp.me>",
+  "bin": {
+    "lstok": "./src/bin.ts"
+  },
   "type": "module",
-  "main": "index.js"
+  "publishConfig": {
+    "bin": {
+      "lstok": "./bin.js"
+    }
+  },
+  "dependencies": {
+    "tiktoken": "^1.0.22"
+  },
+  "devDependencies": {
+    "@js-fns/dev": "^0.3.6",
+    "@types/node": "^26.6.6",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0"
+  },
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "packageManager": "pnpm@12.21.0"
 }

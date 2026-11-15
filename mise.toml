@@ -1,3 +1,25 @@
 [tools]
 node = "latest"
+oxfmt = "latest"
 pnpm = "latest"
+
+[tasks.build]
+run = "pnpm exec jsd build"
+
+[tasks.ci]
+depends = ["format:check", "typecheck", "test"]
+
+[tasks.format]
+run = "oxfmt"
+
+[tasks."format:check"]
+run = "oxfmt --check"
+
+[tasks.test]
+run = "pnpm exec vitest run"
+
+[tasks."test:watch"]
+run = "pnpm exec vitest"
+
+[tasks.typecheck]
+run = "pnpm exec tsc --noEmit"

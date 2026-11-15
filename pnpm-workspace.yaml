@@ -1,0 +1,3 @@
+overrides:
+  # Newer Rolldown versions reject jsd's external imports between source entries.
+  "@js-fns/dev>rolldown": 1.2.0
