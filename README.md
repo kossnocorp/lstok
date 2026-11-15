@@ -1,6 +1,6 @@
 # lstok
 
-Simple CLI to measure file sizes in tokens via [tiktoken] and AI coding agents' project context consumption.
+A simple CLI to count file tokens with [tiktoken] and measure AI coding agents' token usage in your project.
 
 Supports OpenCode, Codex, Claude Code, and Pi.
 

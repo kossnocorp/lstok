@@ -1,15 +1,18 @@
 {
   "name": "lstok",
-  "version": "0.0.0",
-  "description": "Simple CLI that measures file size in tokens or project setup consumption",
+  "version": "0.1.0",
+  "description": "CLI to count file tokens and measure AI coding agents' token usage in your project",
   "keywords": [
-    "CLI",
-    "Claude",
-    "Codex",
-    "LLM",
-    "OpenCode",
-    "size in tokens",
-    "tokenizer"
+    "ai-agents",
+    "claude-code",
+    "cli",
+    "codex",
+    "llm",
+    "opencode",
+    "pi",
+    "tiktoken",
+    "token-count",
+    "token-usage"
   ],
   "license": "MIT",
   "author": "Sasha Koss <koss@nocorp.me>",
