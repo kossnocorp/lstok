@@ -25,12 +25,11 @@ export function createUsageCollector(harness: Harness) {
   function addPiUsage(value: unknown) {
     const usage = object(value);
 
-    add("input_tokens", usage.input);
-    add("output_tokens", usage.output);
-    add("cached_input_tokens", usage.cacheRead);
-    add("cache_write_tokens", usage.cacheWrite);
-    add("total_tokens", usage.totalTokens);
-    add("cost_usd", object(usage.cost).total);
+    add("input", usage.input);
+    add("total_output", usage.output);
+    add("cache_read", usage.cacheRead);
+    add("cache_write", usage.cacheWrite);
+    add("cost", object(usage.cost).total);
   }
 
   return {
@@ -54,7 +53,17 @@ export function createUsageCollector(harness: Harness) {
       if (harness === "codex" && event.type === "turn.completed") {
         const usage = object(event.usage);
 
-        for (const [key, value] of Object.entries(usage)) add(key, value);
+        add("total_input", usage.input_tokens);
+        add("cache_read", usage.cached_input_tokens);
+        add("total_output", usage.output_tokens);
+        add("reasoning", usage.reasoning_output_tokens);
+        if (typeof usage.input_tokens === "number" && typeof usage.cached_input_tokens === "number")
+          add("input", usage.input_tokens - usage.cached_input_tokens);
+        if (
+          typeof usage.output_tokens === "number" &&
+          typeof usage.reasoning_output_tokens === "number"
+        )
+          add("output", usage.output_tokens - usage.reasoning_output_tokens);
       }
 
       if (harness === "claude" && event.type === "result") {
@@ -72,11 +81,11 @@ export function createUsageCollector(harness: Harness) {
 
         const usage = object(event.usage);
 
-        add("input_tokens", usage.input_tokens);
-        add("output_tokens", usage.output_tokens);
-        add("cached_input_tokens", usage.cache_read_input_tokens);
-        add("cache_write_tokens", usage.cache_creation_input_tokens);
-        add("cost_usd", event.total_cost_usd);
+        add("input", usage.input_tokens);
+        add("total_output", usage.output_tokens);
+        add("cache_read", usage.cache_read_input_tokens);
+        add("cache_write", usage.cache_creation_input_tokens);
+        add("cost", event.total_cost_usd);
       }
 
       if (harness === "pi") {
@@ -115,13 +124,12 @@ export function createUsageCollector(harness: Harness) {
 
         const tokens = object(part.tokens);
 
-        add("input_tokens", tokens.input);
-        add("output_tokens", tokens.output);
-        add("reasoning_tokens", tokens.reasoning);
-        add("total_tokens", tokens.total);
-        add("cached_input_tokens", object(tokens.cache).read);
-        add("cache_write_tokens", object(tokens.cache).write);
-        add("cost_usd", part.cost);
+        add("input", tokens.input);
+        add("output", tokens.output);
+        add("reasoning", tokens.reasoning);
+        add("cache_read", object(tokens.cache).read);
+        add("cache_write", object(tokens.cache).write);
+        add("cost", part.cost);
       }
     },
 
@@ -129,7 +137,17 @@ export function createUsageCollector(harness: Harness) {
       if (piError) throw new Error(`pi: ${piError}`);
       if (!found) throw new Error(`${harness} did not report usage statistics.`);
 
-      return stats;
+      const result = { ...stats };
+      function sum(key: string, parts: string[]) {
+        if (parts.every((part) => result[part] !== undefined))
+          result[key] = parts.reduce((total, part) => total + result[part]!, 0);
+      }
+
+      if (harness !== "codex") sum("total_input", ["input", "cache_read", "cache_write"]);
+      if (harness === "opencode") sum("total_output", ["output", "reasoning"]);
+      sum("total", ["total_input", "total_output"]);
+
+      return result;
     },
   };
 }

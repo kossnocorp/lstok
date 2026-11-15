@@ -8,6 +8,12 @@ This change log follows the format documented in [Keep a CHANGELOG].
 [semantic versioning]: http://semver.org/
 [keep a changelog]: http://keepachangelog.com/
 
+## Unreleased
+
+### Changed
+
+- Use short agent statistics names with consistent `cost`, `total`, `total_input`, and `total_output` semantics.
+
 ## v0.2.0 - 2026-10-16
 
 ### Added

@@ -16,11 +16,13 @@ const event = {
 };
 
 const expected = {
-  input_tokens: 100,
-  output_tokens: 10,
-  cached_input_tokens: 30,
-  cache_write_tokens: 20,
-  cost_usd: 0.01,
+  input: 100,
+  total_output: 10,
+  cache_read: 30,
+  cache_write: 20,
+  cost: 0.01,
+  total_input: 150,
+  total: 160,
 };
 
 describe("Claude", () => {
@@ -58,7 +60,7 @@ describe("Claude", () => {
 
     collector.accept('{"type":"result","usage":{"input_tokens":0}}');
 
-    expect(collector.result()).toEqual({ input_tokens: 0 });
+    expect(collector.result()).toEqual({ input: 0 });
   });
 
   it("uses noninteractive structured-output arguments", () => {

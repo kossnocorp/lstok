@@ -13,13 +13,21 @@ describe("Codex", () => {
       input_tokens: 100,
       cached_input_tokens: 80,
       output_tokens: 5,
-      reasoning_output_tokens: 0,
+      reasoning_output_tokens: 2,
     };
 
     collector.accept('{"type":"turn.started"}');
     collector.accept(JSON.stringify({ type: "turn.completed", usage }));
 
-    expect(collector.result()).toEqual(usage);
+    expect(collector.result()).toEqual({
+      input: 20,
+      cache_read: 80,
+      output: 3,
+      reasoning: 2,
+      total_input: 100,
+      total_output: 5,
+      total: 105,
+    });
   });
 
   it("reports zero usage and rejects missing usage, malformed output, and failures", () => {
@@ -33,7 +41,7 @@ describe("Codex", () => {
 
     collector.accept('{"type":"turn.completed","usage":{"input_tokens":0}}');
 
-    expect(collector.result()).toEqual({ input_tokens: 0 });
+    expect(collector.result()).toEqual({ total_input: 0 });
   });
 
   it("passes prompts as a single argument after --", () => {
@@ -48,6 +56,10 @@ describe("Codex", () => {
   it("reads a harness JSONL stream in the caller's directory", () => {
     const usage = { input_tokens: 42, output_tokens: 2 };
 
-    checkStream(directory, "codex", [{ type: "turn.completed", usage }], usage);
+    checkStream(directory, "codex", [{ type: "turn.completed", usage }], {
+      total_input: 42,
+      total_output: 2,
+      total: 44,
+    });
   });
 });

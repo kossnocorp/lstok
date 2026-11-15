@@ -65,6 +65,29 @@ The default question can be overridden via `--prompt`:
 npx lstok --codex --prompt "Describe the project architecture"
 ```
 
+### Agent Statistics
+
+Agent mode prints JSON statistics for the whole run, summed across model calls (or taken from the agent's cumulative result).
+
+| Field          | Meaning                                                      |
+| -------------- | ------------------------------------------------------------ |
+| `input`        | Input tokens excluding cache reads and writes                |
+| `cache_read`   | Input tokens read from cache                                 |
+| `cache_write`  | Input tokens written to cache                                |
+| `output`       | Output tokens excluding reasoning, when separately available |
+| `reasoning`    | Reasoning tokens, when separately available                  |
+| `cost`         | Agent-reported or estimated cost in USD                      |
+| `total_input`  | All input tokens, including cache reads and writes           |
+| `total_output` | All output tokens, including reasoning                       |
+| `total`        | `total_input + total_output`                                 |
+
+Unavailable fields are omitted, not reported as zero. Totals are calculated only when the required counts are available.
+
+- **OpenCode:** provides the full breakdown; input and output totals include cache and reasoning tokens respectively.
+- **Codex:** its input count already includes cache reads; its output count includes reasoning. Cache writes and cost are unavailable. `input` is derived when cache reads are reported; `output` and `reasoning` are available only when a separate reasoning count is reported.
+- **Claude Code:** provides input, cache reads/writes, combined output, and cost. Separate visible output and reasoning counts are unavailable.
+- **Pi:** provides input, cache reads/writes, combined output, and cost. Separate visible output and reasoning counts are unavailable.
+
 ## Changelog
 
 See [the changelog](./CHANGELOG.md).

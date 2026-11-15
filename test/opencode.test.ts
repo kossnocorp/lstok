@@ -27,13 +27,17 @@ describe("OpenCode", () => {
     collector.accept(event("b"));
 
     expect(collector.result()).toEqual({
-      input_tokens: 20,
-      output_tokens: 6,
-      reasoning_tokens: 2,
-      cached_input_tokens: 40,
-      cache_write_tokens: 10,
-      cost_usd: 0.02,
+      input: 20,
+      output: 6,
+      reasoning: 2,
+      cache_read: 40,
+      cache_write: 10,
+      cost: 0.02,
+      total_input: 70,
+      total_output: 8,
+      total: 78,
     });
+    expect(collector.result().total).toBe(78);
   });
 
   it("passes the prompt after --", () => {

@@ -36,12 +36,13 @@ describe("Pi", () => {
       collector.accept(JSON.stringify(item));
 
     expect(collector.result()).toEqual({
-      input_tokens: 300,
-      output_tokens: 30,
-      cached_input_tokens: 90,
-      cache_write_tokens: 60,
-      total_tokens: 480,
-      cost_usd: 0.03,
+      input: 300,
+      total_output: 30,
+      cache_read: 90,
+      cache_write: 60,
+      total_input: 450,
+      total: 480,
+      cost: 0.03,
     });
   });
 
@@ -57,7 +58,7 @@ describe("Pi", () => {
     expect(() => collector.result()).toThrow("overloaded");
 
     collector.accept(JSON.stringify(event));
-    expect(collector.result().input_tokens).toBe(200);
+    expect(collector.result().input).toBe(200);
 
     collector.accept('{"type":"auto_retry_end","success":false,"finalError":"Retries exhausted"}');
     expect(() => collector.result()).toThrow("Retries exhausted");
@@ -79,7 +80,7 @@ describe("Pi", () => {
 
     collector.accept('{"type":"message_end","message":{"role":"assistant","usage":{"input":0}}}');
 
-    expect(collector.result()).toEqual({ input_tokens: 0 });
+    expect(collector.result()).toEqual({ input: 0 });
   });
 
   it("uses noninteractive structured-output arguments", () => {
@@ -95,12 +96,13 @@ describe("Pi", () => {
         event,
       ],
       {
-        input_tokens: 100,
-        output_tokens: 10,
-        cached_input_tokens: 30,
-        cache_write_tokens: 20,
-        total_tokens: 160,
-        cost_usd: 0.01,
+        input: 100,
+        total_output: 10,
+        cache_read: 30,
+        cache_write: 20,
+        total_input: 150,
+        total: 160,
+        cost: 0.01,
       },
     );
   });
