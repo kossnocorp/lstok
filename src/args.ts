@@ -17,6 +17,8 @@ export function parseArguments(args: string[]) {
       claude: { type: "boolean" },
       pi: { type: "boolean" },
       prompt: { type: "string" },
+      model: { type: "string" },
+      provider: { type: "string" },
       encoding: { type: "string" },
       econding: { type: "string" },
     },
@@ -41,11 +43,23 @@ export function parseArguments(args: string[]) {
     if (values.prompt !== undefined && !values.prompt.trim())
       throw new Error("--prompt must not be empty.");
 
-    return { mode: "harness", harness, prompt: values.prompt ?? defaultPrompt } as const;
+    if (values.provider !== undefined && harness !== "pi")
+      throw new Error("--provider is only supported with --pi.");
+
+    return {
+      mode: "harness",
+      harness,
+      prompt: values.prompt ?? defaultPrompt,
+      model: values.model,
+      provider: values.provider,
+    } as const;
   }
 
   if (values.prompt !== undefined)
     throw new Error("--prompt requires --opencode, --codex, --claude, or --pi.");
+
+  if (values.model !== undefined || values.provider !== undefined)
+    throw new Error("--model and --provider require --opencode, --codex, --claude, or --pi.");
 
   if (positionals.length !== 1) throw new Error("Usage: lstok <file> [--encoding <name>]");
 

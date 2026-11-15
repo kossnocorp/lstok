@@ -134,25 +134,41 @@ export function createUsageCollector(harness: Harness) {
   };
 }
 
-export function harnessArguments(harness: Harness, prompt: string) {
+export interface HarnessOptions {
+  model?: string;
+  provider?: string;
+}
+
+export function harnessArguments(harness: Harness, prompt: string, options: HarnessOptions = {}) {
+  const args: string[] = [];
+  if (options.model !== undefined) args.push("--model", options.model);
+  if (options.provider !== undefined) {
+    if (harness !== "pi") throw new Error("--provider is only supported with --pi.");
+    args.push("--provider", options.provider);
+  }
+
   switch (harness) {
     case "opencode":
-      return ["run", "--format", "json", "--", prompt];
+      return ["run", "--format", "json", ...args, "--", prompt];
 
     case "codex":
-      return ["exec", "--json", "--", prompt];
+      return ["exec", "--json", ...args, "--", prompt];
 
     case "claude":
-      return ["--print", "--output-format", "stream-json", "--verbose", "--", prompt];
+      return ["--print", "--output-format", "stream-json", "--verbose", ...args, "--", prompt];
 
     // Send Pi's prompt over stdin: even after -- it treats @-prefixed arguments as files.
     case "pi":
-      return ["--print", "--mode", "json"];
+      return ["--print", "--mode", "json", ...args];
   }
 }
 
-export async function runHarness(harness: Harness, prompt: string): Promise<Stats> {
-  const child = spawn(harness, harnessArguments(harness, prompt), {
+export async function runHarness(
+  harness: Harness,
+  prompt: string,
+  options: HarnessOptions = {},
+): Promise<Stats> {
+  const child = spawn(harness, harnessArguments(harness, prompt, options), {
     cwd: process.cwd(),
     stdio: ["pipe", "pipe", "inherit"],
   });

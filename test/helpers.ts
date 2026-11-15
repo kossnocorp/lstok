@@ -42,12 +42,18 @@ export function checkStream(
   expected: Record<string, number>,
 ) {
   const prompt = "@literal prompt; $HOME\nsecond line";
+  const model = "Custom/Model:high#Variant; $HOME";
+  const provider = "Custom-Provider";
   const output = events.map((event) => JSON.stringify(event)).join("\r\n");
 
   writeFileSync(
     join(directory, harness),
     `#!${process.execPath}
 const fs = require('node:fs');
+const args = process.argv.slice(2);
+if (args[args.indexOf('--model') + 1] !== ${JSON.stringify(model)}) process.exit(3);
+if (${harness === "pi"} && args[args.indexOf('--provider') + 1] !== ${JSON.stringify(provider)}) process.exit(4);
+if (args.includes('--') && args.indexOf('--model') > args.indexOf('--')) process.exit(5);
 const prompt = ${harness === "pi" ? "fs.readFileSync(0, 'utf8')" : "process.argv.at(-1)"};
 if (prompt !== ${JSON.stringify(prompt)} || process.cwd() !== ${JSON.stringify(directory)}) process.exit(2);
 const bytes = Buffer.from(${JSON.stringify(output)});
@@ -57,7 +63,17 @@ for (const byte of bytes) fs.writeSync(1, Buffer.from([byte]));
     { mode: 0o755 },
   );
 
-  const result = runCli([`--${harness}`, "--prompt", prompt], directory);
+  const result = runCli(
+    [
+      `--${harness}`,
+      "--prompt",
+      prompt,
+      "--model",
+      model,
+      ...(harness === "pi" ? ["--provider", provider] : []),
+    ],
+    directory,
+  );
 
   expect(result.stderr).toBe("");
   expect(result.status).toBe(0);
