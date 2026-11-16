@@ -67,16 +67,6 @@ npx lstok --codex --prompt "Describe the project architecture"
 
 ### Agent Statistics
 
-Use `--jq` to filter the result through your installed `jq`, or `--jq-raw` for raw string output (`jq -r`):
-
-```sh
-npx lstok --opencode --jq '.total_input'
-npx lstok --codex --jq '{input: .total_input, output: .total_output}'
-npx lstok --pi --jq-raw '"Input: \(.total_input), output: \(.total_output)"'
-```
-
-These flags also work in file mode. They are mutually exclusive, require `jq` on `PATH`, and preserve jq's stdout, stderr, and exit status.
-
 Agent mode prints JSON statistics for the whole run, summed across model calls (or taken from the agent's cumulative result).
 
 | Field          | Meaning                                                      |
@@ -97,6 +87,18 @@ Unavailable fields are omitted, not reported as zero. Totals are calculated only
 - **Codex:** its input count already includes cache reads; its output count includes reasoning. Cache writes and cost are unavailable. `input` is derived when cache reads are reported; `output` and `reasoning` are available only when a separate reasoning count is reported.
 - **Claude Code:** provides input, cache reads/writes, combined output, and cost. Separate visible output and reasoning counts are unavailable.
 - **Pi:** provides input, cache reads/writes, combined output, and cost. Separate visible output and reasoning counts are unavailable.
+
+#### Querying with `jq`
+
+Use `--jq` to filter the result through your installed `jq`, or `--jq-raw` for raw string output (`jq -r`):
+
+```sh
+npx lstok --opencode --jq '.total_input'
+npx lstok --codex --jq '{input: .total_input, output: .total_output}'
+npx lstok --pi --jq-raw '"Input: \(.total_input), output: \(.total_output)"'
+```
+
+These flags also work in file mode. They are mutually exclusive, require `jq` on `PATH`, and preserve jq's stdout, stderr, and exit status.
 
 ## Changelog
 
