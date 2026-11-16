@@ -14,6 +14,8 @@ This change log follows the format documented in [Keep a CHANGELOG].
 
 - Add `--tokenizer <id>` for cached Hugging Face Hub and local tokenizers, with `tiktoken` as the default.
 
+- Add `tokenizer` to JSON output to indicate the tokenizer used (`tiktoken` or Hugging Face), with `null` for APIs and agents.
+
 - Add `--api <claude|gemini|openai>` to count file and prompt tokens with provider APIs and environment-based authentication.
 
 - Add `--tee` to stream raw agent output alongside final statistics.
@@ -23,6 +25,8 @@ This change log follows the format documented in [Keep a CHANGELOG].
 - Allow measuring a prompt string via `--prompt` without requiring a file.
 
 - Add `time` to JSON output to record the agent execution or token counting duration.
+
+- Add `mode` to JSON output to indicate the current operation mode (`file`, `prompt`, or `agent`).
 
 ## v0.3.0 - 2026-10-16
 
