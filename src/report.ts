@@ -1,4 +1,5 @@
 export interface Report {
+  mode: "local" | "api" | "agent";
   input: number | null;
   cache_read: number | null;
   cache_write: number | null;
@@ -11,10 +12,11 @@ export interface Report {
   total: number | null;
   provider: string | null;
   model: string | null;
+  tokenizer: string | null;
   encoding: string | null;
 }
 
-export function createReport(values: Partial<Report> = {}): Report {
+export function createReport(values: Partial<Report> & Pick<Report, "mode">): Report {
   return {
     input: null,
     cache_read: null,
@@ -28,13 +30,20 @@ export function createReport(values: Partial<Report> = {}): Report {
     total: null,
     provider: null,
     model: null,
+    tokenizer: null,
     encoding: null,
     ...values,
   };
 }
 
-export function fileReport(input: number, encoding: string, time: number): Report {
+export function fileReport(
+  input: number,
+  tokenizer: string,
+  encoding: string | null,
+  time: number,
+): Report {
   return createReport({
+    mode: "local",
     input,
     time,
     cache_read: 0,
@@ -44,6 +53,7 @@ export function fileReport(input: number, encoding: string, time: number): Repor
     total_input: input,
     total_output: 0,
     total: input,
+    tokenizer,
     encoding,
   });
 }

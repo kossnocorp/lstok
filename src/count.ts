@@ -15,7 +15,7 @@ export function measureTokens(text: string, encoding = defaultEncoding) {
     const start = performance.now();
     const input = encoder.encode(text, [], []).length;
     const time = performance.now() - start;
-    return fileReport(input, encoding, time);
+    return fileReport(input, "tiktoken", encoding, time);
   } finally {
     encoder.free();
   }

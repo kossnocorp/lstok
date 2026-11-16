@@ -82,6 +82,7 @@ for (const byte of bytes) fs.writeSync(1, Buffer.from([byte]));
   expect(result.status).toBe(0);
   expect(JSON.parse(result.stdout)).toEqual(
     createReport({
+      mode: "agent",
       ...expected,
       time: expect.any(Number),
       model,

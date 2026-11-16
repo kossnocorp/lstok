@@ -58,6 +58,7 @@ process.stdout.write(raw ? 'tokens: 42' : '"tokens: 42"\\n');
     const result = runCli(["--codex", "--json"], directory);
     expect(result.status).toBe(0);
     expect(JSON.parse(result.stdout)).toEqual({
+      mode: "agent",
       input: null,
       cache_read: null,
       cache_write: null,
@@ -70,6 +71,7 @@ process.stdout.write(raw ? 'tokens: 42' : '"tokens: 42"\\n');
       total: 44,
       model: null,
       provider: null,
+      tokenizer: null,
       encoding: null,
     });
     expect(JSON.parse(result.stdout).time).toBeGreaterThanOrEqual(100);

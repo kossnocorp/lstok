@@ -25,6 +25,8 @@ describe("counting APIs", () => {
       total: 12,
       model: "test-model",
       encoding: null,
+      mode: "api",
+      tokenizer: null,
       cost: null,
       output: 0,
       provider: api === "claude" ? "anthropic" : api === "gemini" ? "google" : "openai",

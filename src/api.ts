@@ -52,6 +52,7 @@ export async function countApi(text: string, api: Api, model: string) {
   if (typeof input !== "number" || !Number.isSafeInteger(input) || input < 0)
     throw new Error(`${api} returned an invalid token count.`);
   return createReport({
+    mode: "api",
     input,
     total_input: input,
     total: input,

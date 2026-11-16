@@ -45,6 +45,7 @@ describe("tiktoken", () => {
     const json = runCli([file, "--json", "--encoding", "cl100k_base"]);
     expect(json.status).toBe(0);
     expect(JSON.parse(json.stdout)).toEqual({
+      mode: "local",
       input: 2,
       cache_read: 0,
       cache_write: 0,
@@ -57,6 +58,7 @@ describe("tiktoken", () => {
       total: 2,
       provider: null,
       model: null,
+      tokenizer: "tiktoken",
       encoding: "cl100k_base",
     });
 

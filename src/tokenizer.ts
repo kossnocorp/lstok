@@ -66,5 +66,5 @@ export async function countTokenizer(text: string, selector: string) {
   const tokenizer = new Tokenizer(...(await loadTokenizer(selector)));
   const start = performance.now();
   const input = tokenizer.encode(text, { add_special_tokens: false }).ids.length;
-  return fileReport(input, selector, performance.now() - start);
+  return fileReport(input, selector, null, performance.now() - start);
 }

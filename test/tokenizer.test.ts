@@ -40,7 +40,12 @@ describe("Hugging Face tokenizers", () => {
       const result = runCli([...input, "--tokenizer", directory, "--json"]);
       expect(result.stderr).toBe("");
       expect(result.status).toBe(0);
-      expect(JSON.parse(result.stdout)).toMatchObject({ total: 3, encoding: directory });
+      expect(JSON.parse(result.stdout)).toMatchObject({
+        total: 3,
+        tokenizer: directory,
+        mode: "local",
+        encoding: null,
+      });
     }
   });
 

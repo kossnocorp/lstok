@@ -287,7 +287,7 @@ export async function runHarness(
     const metadata = collector.metadata(options);
     if (harness === "opencode" && metadata.provider === null && options.model?.includes("/"))
       metadata.provider = options.model.slice(0, options.model.indexOf("/"));
-    return createReport({ ...collector.result(), ...metadata, time });
+    return createReport({ ...collector.result(), ...metadata, time, mode: "agent" });
   } finally {
     process.off("SIGINT", interrupt);
   }
