@@ -35,6 +35,16 @@ The default encoding is `o200k_base`. Use `--encoding` to select another:
 npx lstok ./AGENTS.md --encoding cl100k_base
 ```
 
+### Measuring a Prompt
+
+Without an agent flag or file, `--prompt` counts tokens in the supplied text:
+
+```sh
+npx lstok --prompt "hello world"
+#=> 2
+npx lstok --prompt "hello world" --encoding cl100k_base --json
+```
+
 ### Measuring Agent Setup
 
 Run an agent with a basic prompt "What is the project name?" to check the project's base context and token usage.
@@ -67,7 +77,7 @@ npx lstok --codex --prompt "Describe the project architecture"
 
 ### Statistics
 
-Both file and agent modes print only the total token count by default. Use `--json` for the same full statistics schema in either mode:
+File, prompt, and agent modes print only the total token count by default. Use `--json` for the same full statistics schema in all modes:
 
 ```sh
 npx lstok AGENTS.md --json
@@ -84,16 +94,19 @@ Agent statistics cover the whole run, summed across model calls (or taken from t
 | `output`       | Output tokens excluding reasoning, when separately available |
 | `reasoning`    | Reasoning tokens, when separately available                  |
 | `cost`         | Agent-reported or estimated cost in USD                      |
+| `time`         | Elapsed time in milliseconds                                 |
 | `total_input`  | All input tokens, including cache reads and writes           |
 | `total_output` | All output tokens, including reasoning                       |
 | `total`        | `total_input + total_output`                                 |
 | `provider`     | Reported provider, explicit selection, or `null`             |
 | `model`        | Reported model, explicit selection, or `null`                |
-| `encoding`     | Tiktoken encoding for files; `null` for agents               |
+| `encoding`     | Tiktoken encoding for files/prompts; `null` for agents       |
 
 All fields are always present in JSON. Missing counts, or breakdowns included in another count that cannot be separated, are `null`. Totals are calculated only when the required counts are available; otherwise they are `null` too.
 
-For file estimates, `input`, `total_input`, and `total` contain the token count. Cache, output, and reasoning counts are `0`; `cost`, `provider`, and `model` are `null`. `encoding` contains the selected encoding (default: `o200k_base`).
+For file and prompt estimates, `input`, `total_input`, and `total` contain the token count. Cache, output, and reasoning counts are `0`; `cost`, `provider`, and `model` are `null`. `encoding` contains the selected encoding (default: `o200k_base`).
+
+`time` measures the full agent process run through exit. For files and prompts, it measures only token encoding, excluding file reading and encoder setup.
 
 Agent-reported metadata takes precedence over explicit CLI selections. Multiple reported models or providers produce `null` for the corresponding field. OpenCode's explicit `provider/model` selection also supplies the provider; configured defaults that aren't reported remain `null`. Model selections are preserved verbatim when used as a fallback.
 

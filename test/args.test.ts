@@ -12,7 +12,8 @@ describe("arguments", () => {
   it.each([
     [],
     ["a", "b"],
-    ["--prompt", "hello"],
+    ["file.md", "--prompt", "hello"],
+    ["--prompt", "hello", "--model", "custom"],
     ["file.md", "--model", "custom"],
     ["file.md", "--provider", "custom"],
     ["--codex", "--provider", "custom"],

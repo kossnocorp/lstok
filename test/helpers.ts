@@ -83,6 +83,7 @@ for (const byte of bytes) fs.writeSync(1, Buffer.from([byte]));
   expect(JSON.parse(result.stdout)).toEqual(
     createReport({
       ...expected,
+      time: expect.any(Number),
       model,
       provider: harness === "pi" ? provider : harness === "opencode" ? "Custom" : null,
     }),

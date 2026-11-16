@@ -50,6 +50,7 @@ describe("tiktoken", () => {
       output: 0,
       reasoning: 0,
       cost: null,
+      time: expect.any(Number),
       total_input: 2,
       total_output: 0,
       total: 2,
@@ -63,5 +64,20 @@ describe("tiktoken", () => {
     expect(result.status).toBe(1);
     expect(result.stderr).toContain("lstok:");
     expect(result.stdout).toBe("");
+  });
+  it("counts standalone prompts, including empty text and selected encodings", () => {
+    expect(runCli(["--prompt", "hello world"]).stdout).toBe("2\n");
+    expect(runCli(["--prompt", ""]).stdout).toBe("0\n");
+    const result = runCli([
+      "--prompt",
+      "お誕生日おめでとう",
+      "--encoding",
+      "cl100k_base",
+      "--json",
+    ]);
+    expect(result.status).toBe(0);
+    const report = JSON.parse(result.stdout);
+    expect(report).toMatchObject({ input: 9, total: 9, encoding: "cl100k_base" });
+    expect(report.time).toBeGreaterThanOrEqual(0);
   });
 });

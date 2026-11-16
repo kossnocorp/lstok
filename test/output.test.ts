@@ -11,6 +11,7 @@ describe("jq output", () => {
     join(directory, "codex"),
     `#!${process.execPath}
 console.log(JSON.stringify({type: "turn.completed", usage: {input_tokens: 42, output_tokens: 2}}));
+setTimeout(() => {}, 100);
 `,
     { mode: 0o755 },
   );
@@ -55,6 +56,7 @@ process.stdout.write(raw ? 'tokens: 42' : '"tokens: 42"\\n');
       output: null,
       reasoning: null,
       cost: null,
+      time: expect.any(Number),
       total_input: 42,
       total_output: 2,
       total: 44,
@@ -62,5 +64,6 @@ process.stdout.write(raw ? 'tokens: 42' : '"tokens: 42"\\n');
       provider: null,
       encoding: null,
     });
+    expect(JSON.parse(result.stdout).time).toBeGreaterThanOrEqual(100);
   });
 });

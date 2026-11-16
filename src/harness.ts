@@ -214,6 +214,7 @@ export async function runHarness(
   prompt: string,
   options: HarnessOptions = {},
 ): Promise<Report> {
+  const start = performance.now();
   const child = spawn(harness, harnessArguments(harness, prompt, options), {
     cwd: process.cwd(),
     stdio: ["pipe", "pipe", "inherit"],
@@ -224,6 +225,11 @@ export async function runHarness(
 
   let buffer = "";
   let parseError: Error | undefined;
+  let time: number | null = null;
+
+  child.on("exit", () => {
+    time = performance.now() - start;
+  });
 
   const interrupt = () => child.kill("SIGINT");
   process.on("SIGINT", interrupt);
@@ -277,7 +283,7 @@ export async function runHarness(
     const metadata = collector.metadata(options);
     if (harness === "opencode" && metadata.provider === null && options.model?.includes("/"))
       metadata.provider = options.model.slice(0, options.model.indexOf("/"));
-    return createReport({ ...collector.result(), ...metadata });
+    return createReport({ ...collector.result(), ...metadata, time });
   } finally {
     process.off("SIGINT", interrupt);
   }

@@ -5,6 +5,7 @@ export interface Report {
   output: number | null;
   reasoning: number | null;
   cost: number | null;
+  time: number | null;
   total_input: number | null;
   total_output: number | null;
   total: number | null;
@@ -21,6 +22,7 @@ export function createReport(values: Partial<Report> = {}): Report {
     output: null,
     reasoning: null,
     cost: null,
+    time: null,
     total_input: null,
     total_output: null,
     total: null,
@@ -31,9 +33,10 @@ export function createReport(values: Partial<Report> = {}): Report {
   };
 }
 
-export function fileReport(input: number, encoding: string): Report {
+export function fileReport(input: number, encoding: string, time: number): Report {
   return createReport({
     input,
+    time,
     cache_read: 0,
     cache_write: 0,
     output: 0,

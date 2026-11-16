@@ -67,11 +67,21 @@ export function parseArguments(args: string[]) {
     } as const;
   }
 
-  if (values.prompt !== undefined)
-    throw new Error("--prompt requires --opencode, --codex, --claude, or --pi.");
-
   if (values.model !== undefined || values.provider !== undefined)
     throw new Error("--model and --provider require --opencode, --codex, --claude, or --pi.");
+
+  if (values.prompt !== undefined) {
+    if (positionals.length) throw new Error("Choose either a file or --prompt.");
+
+    return {
+      mode: "prompt",
+      prompt: values.prompt,
+      encoding: values.encoding ?? values.econding ?? defaultEncoding,
+      jq,
+      jqRaw,
+      json: values.json,
+    } as const;
+  }
 
   if (positionals.length !== 1) throw new Error("Usage: lstok <file> [--encoding <name>]");
 
