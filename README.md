@@ -65,9 +65,16 @@ The default question can be overridden via `--prompt`:
 npx lstok --codex --prompt "Describe the project architecture"
 ```
 
-### Agent Statistics
+### Statistics
 
-Agent mode prints JSON statistics for the whole run, summed across model calls (or taken from the agent's cumulative result).
+Both file and agent modes print only the total token count by default. Use `--json` for the same full statistics schema in either mode:
+
+```sh
+npx lstok AGENTS.md --json
+npx lstok --opencode --json
+```
+
+Agent statistics cover the whole run, summed across model calls (or taken from the agent's cumulative result).
 
 | Field          | Meaning                                                      |
 | -------------- | ------------------------------------------------------------ |
@@ -80,8 +87,15 @@ Agent mode prints JSON statistics for the whole run, summed across model calls (
 | `total_input`  | All input tokens, including cache reads and writes           |
 | `total_output` | All output tokens, including reasoning                       |
 | `total`        | `total_input + total_output`                                 |
+| `provider`     | Reported provider, explicit selection, or `null`             |
+| `model`        | Reported model, explicit selection, or `null`                |
+| `encoding`     | Tiktoken encoding for files; `null` for agents               |
 
-Unavailable fields are omitted, not reported as zero. Totals are calculated only when the required counts are available.
+All fields are always present in JSON. Missing counts, or breakdowns included in another count that cannot be separated, are `null`. Totals are calculated only when the required counts are available; otherwise they are `null` too.
+
+For file estimates, `input`, `total_input`, and `total` contain the token count. Cache, output, and reasoning counts are `0`; `cost`, `provider`, and `model` are `null`. `encoding` contains the selected encoding (default: `o200k_base`).
+
+Agent-reported metadata takes precedence over explicit CLI selections. Multiple reported models or providers produce `null` for the corresponding field. OpenCode's explicit `provider/model` selection also supplies the provider; configured defaults that aren't reported remain `null`. Model selections are preserved verbatim when used as a fallback.
 
 - **OpenCode:** provides the full breakdown; input and output totals include cache and reasoning tokens respectively.
 - **Codex:** its input count already includes cache reads; its output count includes reasoning. Cache writes and cost are unavailable. `input` is derived when cache reads are reported; `output` and `reasoning` are available only when a separate reasoning count is reported.
@@ -98,7 +112,7 @@ npx lstok --codex --jq '{input: .total_input, output: .total_output}'
 npx lstok --pi --jq-raw '"Input: \(.total_input), output: \(.total_output)"'
 ```
 
-These flags also work in file mode. They are mutually exclusive, require `jq` on `PATH`, and preserve jq's stdout, stderr, and exit status.
+These flags always filter the full JSON schema, even without `--json`, and also work in file mode. They are mutually exclusive, require `jq` on `PATH`, and preserve jq's stdout, stderr, and exit status.
 
 ## Changelog
 

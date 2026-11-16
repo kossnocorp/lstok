@@ -43,4 +43,24 @@ process.stdout.write(raw ? 'tokens: 42' : '"tokens: 42"\\n');
     expect(result.stdout).toBe("");
     expect(result.stderr).toBe("jq: invalid filter\n");
   });
+
+  it("prints the total by default and a complete schema with --json", () => {
+    expect(runCli(["--codex"], directory).stdout).toBe("44\n");
+    const result = runCli(["--codex", "--json"], directory);
+    expect(result.status).toBe(0);
+    expect(JSON.parse(result.stdout)).toEqual({
+      input: null,
+      cache_read: null,
+      cache_write: null,
+      output: null,
+      reasoning: null,
+      cost: null,
+      total_input: 42,
+      total_output: 2,
+      total: 44,
+      model: null,
+      provider: null,
+      encoding: null,
+    });
+  });
 });

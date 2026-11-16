@@ -14,7 +14,11 @@ This change log follows the format documented in [Keep a CHANGELOG].
 
 - Add `--jq` and `--jq-raw` to filter output through installed jq.
 
+- Add `--json` with a shared file/agent schema, nullable missing fields, and provider, model, and encoding metadata.
+
 ### Changed
+
+- Print total tokens by default in both file and agent modes.
 
 - Use short agent statistics names with consistent `cost`, `total`, `total_input`, and `total_output` semantics.
 

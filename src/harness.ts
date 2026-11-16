@@ -1,5 +1,6 @@
 import { spawn } from "node:child_process";
 import type { Harness } from "./args.ts";
+import { createReport, type Report } from "./report.ts";
 
 export type Stats = Record<string, number>;
 
@@ -14,6 +15,13 @@ export function createUsageCollector(harness: Harness) {
   const seen = new Set<string>();
   let found = false;
   let piError: string | undefined;
+  const models = new Set<string>();
+  const providers = new Set<string>();
+
+  function metadata(model: unknown, provider?: unknown) {
+    if (typeof model === "string" && model) models.add(model);
+    if (typeof provider === "string" && provider) providers.add(provider);
+  }
 
   function add(key: string, value: unknown) {
     if (typeof value === "number" && Number.isFinite(value) && value >= 0) {
@@ -49,6 +57,14 @@ export function createUsageCollector(harness: Harness) {
 
         throw new Error(`${harness}: ${error.message ?? event.message ?? "run failed"}`);
       }
+
+      if (harness === "claude" && event.type === "system" && event.subtype === "init")
+        metadata(event.model);
+      if (harness === "claude" && event.type === "assistant") metadata(object(event.message).model);
+      if (harness === "claude" && event.type === "result")
+        for (const model of Object.keys(object(event.modelUsage))) metadata(model);
+      if (harness === "codex" && event.type === "thread.started")
+        metadata(event.model, event.provider);
 
       if (harness === "codex" && event.type === "turn.completed") {
         const usage = object(event.usage);
@@ -93,6 +109,7 @@ export function createUsageCollector(harness: Harness) {
           const message = object(event.message);
 
           if (message.role === "assistant") {
+            metadata(message.model, message.provider);
             addPiUsage(message.usage);
 
             // Pi can retry failed responses. Wait until exit to judge the final outcome.
@@ -149,6 +166,17 @@ export function createUsageCollector(harness: Harness) {
 
       return result;
     },
+
+    metadata(options: HarnessOptions = {}) {
+      return {
+        model: models.size ? (models.size === 1 ? [...models][0]! : null) : (options.model ?? null),
+        provider: providers.size
+          ? providers.size === 1
+            ? [...providers][0]!
+            : null
+          : (options.provider ?? null),
+      };
+    },
   };
 }
 
@@ -185,7 +213,7 @@ export async function runHarness(
   harness: Harness,
   prompt: string,
   options: HarnessOptions = {},
-): Promise<Stats> {
+): Promise<Report> {
   const child = spawn(harness, harnessArguments(harness, prompt, options), {
     cwd: process.cwd(),
     stdio: ["pipe", "pipe", "inherit"],
@@ -246,7 +274,10 @@ export async function runHarness(
       });
     });
 
-    return collector.result();
+    const metadata = collector.metadata(options);
+    if (harness === "opencode" && metadata.provider === null && options.model?.includes("/"))
+      metadata.provider = options.model.slice(0, options.model.indexOf("/"));
+    return createReport({ ...collector.result(), ...metadata });
   } finally {
     process.off("SIGINT", interrupt);
   }

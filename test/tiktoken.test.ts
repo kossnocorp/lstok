@@ -41,6 +41,22 @@ describe("tiktoken", () => {
     writeFileSync(file, "hello world");
 
     expect(runCli([file]).stdout).toBe("2\n");
+    const json = runCli([file, "--json", "--encoding", "cl100k_base"]);
+    expect(json.status).toBe(0);
+    expect(JSON.parse(json.stdout)).toEqual({
+      input: 2,
+      cache_read: 0,
+      cache_write: 0,
+      output: 0,
+      reasoning: 0,
+      cost: null,
+      total_input: 2,
+      total_output: 0,
+      total: 2,
+      provider: null,
+      model: null,
+      encoding: "cl100k_base",
+    });
 
     const result = runCli([join(directory, "missing")]);
 

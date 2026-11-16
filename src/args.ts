@@ -22,6 +22,7 @@ export function parseArguments(args: string[]) {
       encoding: { type: "string" },
       econding: { type: "string" },
       jq: { type: "string" },
+      json: { type: "boolean" },
       "jq-raw": { type: "string" },
     },
   });
@@ -62,6 +63,7 @@ export function parseArguments(args: string[]) {
       provider: values.provider,
       jq,
       jqRaw,
+      json: values.json,
     } as const;
   }
 
@@ -79,5 +81,6 @@ export function parseArguments(args: string[]) {
     encoding: values.encoding ?? values.econding ?? defaultEncoding,
     jq,
     jqRaw,
+    json: values.json,
   } as const;
 }

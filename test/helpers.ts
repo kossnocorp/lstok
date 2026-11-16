@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { delimiter, join, resolve } from "node:path";
 import { afterAll, expect } from "vitest";
 import { parseArguments, type Harness } from "../src/args.ts";
+import { createReport } from "../src/report.ts";
 
 export function temporaryDirectory() {
   const directory = mkdtempSync(join(tmpdir(), "lstok-test-"));
@@ -67,6 +68,7 @@ for (const byte of bytes) fs.writeSync(1, Buffer.from([byte]));
   const result = runCli(
     [
       `--${harness}`,
+      "--json",
       "--prompt",
       prompt,
       "--model",
@@ -78,5 +80,11 @@ for (const byte of bytes) fs.writeSync(1, Buffer.from([byte]));
 
   expect(result.stderr).toBe("");
   expect(result.status).toBe(0);
-  expect(JSON.parse(result.stdout)).toEqual(expected);
+  expect(JSON.parse(result.stdout)).toEqual(
+    createReport({
+      ...expected,
+      model,
+      provider: harness === "pi" ? provider : harness === "opencode" ? "Custom" : null,
+    }),
+  );
 }
