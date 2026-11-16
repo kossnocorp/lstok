@@ -29,6 +29,7 @@ export function checkHarnessArguments(harness: Harness) {
     mode: "harness",
     harness,
     prompt: "What is the project name?",
+    jqRaw: false,
   });
   expect(parseArguments([`--${harness}`, "--prompt", "custom"])).toHaveProperty("prompt", "custom");
   expect(() => parseArguments([`--${harness}`, "file.md"])).toThrow();

@@ -3,6 +3,7 @@
 import { parseArguments } from "./args.ts";
 import { countFile } from "./count.ts";
 import { runHarness } from "./harness.ts";
+import { printOutput } from "./output.ts";
 
 async function main() {
   const options = parseArguments(process.argv.slice(2));
@@ -22,6 +23,8 @@ Options:
   --prompt <prompt>  Default: What is the project name?
   --model <model>    Model passed unchanged to the agent CLI
   --provider <name>  Provider passed unchanged to Pi (--pi only)
+  --jq <filter>      Filter output through installed jq
+  --jq-raw <filter>  Filter output through installed jq with raw string output
   -h, --help         Show help
 
 Harnesses run in the current directory with their installed configuration.
@@ -29,12 +32,14 @@ File mode prints a token count; harness mode prints reported statistics as JSON.
       break;
 
     case "file":
-      console.log(await countFile(options.file, options.encoding));
+      await printOutput(await countFile(options.file, options.encoding), options.jq, options.jqRaw);
       break;
 
     case "harness":
-      console.log(
-        JSON.stringify(await runHarness(options.harness, options.prompt, options), null, 2),
+      await printOutput(
+        await runHarness(options.harness, options.prompt, options),
+        options.jq,
+        options.jqRaw,
       );
       break;
   }

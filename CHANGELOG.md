@@ -10,6 +10,10 @@ This change log follows the format documented in [Keep a CHANGELOG].
 
 ## Unreleased
 
+### Added
+
+- Add `--jq` and `--jq-raw` to filter output through installed jq.
+
 ### Changed
 
 - Use short agent statistics names with consistent `cost`, `total`, `total_input`, and `total_output` semantics.

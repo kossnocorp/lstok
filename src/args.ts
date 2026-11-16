@@ -21,10 +21,18 @@ export function parseArguments(args: string[]) {
       provider: { type: "string" },
       encoding: { type: "string" },
       econding: { type: "string" },
+      jq: { type: "string" },
+      "jq-raw": { type: "string" },
     },
   });
 
   if (values.help) return { mode: "help" } as const;
+
+  if (values.jq !== undefined && values["jq-raw"] !== undefined)
+    throw new Error("Choose only one of --jq or --jq-raw.");
+
+  const jq = values.jq ?? values["jq-raw"];
+  const jqRaw = values["jq-raw"] !== undefined;
 
   const selected = harnesses.filter((name) => values[name]);
 
@@ -52,6 +60,8 @@ export function parseArguments(args: string[]) {
       prompt: values.prompt ?? defaultPrompt,
       model: values.model,
       provider: values.provider,
+      jq,
+      jqRaw,
     } as const;
   }
 
@@ -67,5 +77,7 @@ export function parseArguments(args: string[]) {
     mode: "file",
     file: positionals[0]!,
     encoding: values.encoding ?? values.econding ?? defaultEncoding,
+    jq,
+    jqRaw,
   } as const;
 }

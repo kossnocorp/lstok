@@ -67,6 +67,16 @@ npx lstok --codex --prompt "Describe the project architecture"
 
 ### Agent Statistics
 
+Use `--jq` to filter the result through your installed `jq`, or `--jq-raw` for raw string output (`jq -r`):
+
+```sh
+npx lstok --opencode --jq '.total_input'
+npx lstok --codex --jq '{input: .total_input, output: .total_output}'
+npx lstok --pi --jq-raw '"Input: \(.total_input), output: \(.total_output)"'
+```
+
+These flags also work in file mode. They are mutually exclusive, require `jq` on `PATH`, and preserve jq's stdout, stderr, and exit status.
+
 Agent mode prints JSON statistics for the whole run, summed across model calls (or taken from the agent's cumulative result).
 
 | Field          | Meaning                                                      |

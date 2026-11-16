@@ -11,6 +11,7 @@ describe("tiktoken", () => {
   it("defaults to o200k_base and supports both encoding spellings", () => {
     expect(parseArguments(["AGENTS.md"])).toEqual({
       mode: "file",
+      jqRaw: false,
       file: "AGENTS.md",
       encoding: "o200k_base",
     });

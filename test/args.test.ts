@@ -25,6 +25,9 @@ describe("arguments", () => {
     ["--codex", "--encoding", "o200k_base"],
     ["--opencode", "--prompt", " "],
     ["--unknown"],
+    ["--codex", "--jq"],
+    ["--codex", "--jq-raw"],
+    ["--codex", "--jq", ".", "--jq-raw", "."],
     ["a", "--encoding", "gpt2", "--econding", "cl100k_base"],
   ])("rejects invalid arguments %j", (...args) => {
     expect(() => parseArguments(args)).toThrow();
