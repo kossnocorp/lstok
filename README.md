@@ -22,6 +22,14 @@ npm install -g lstok
 
 ### Measuring File
 
+Use either a positional path or `--file <path>`:
+
+```sh
+npx lstok --file ./AGENTS.md
+```
+
+These forms support the same options and cannot be combined.
+
 Count tokens in a file:
 
 ```sh
@@ -93,6 +101,15 @@ npx lstok --pi
 
 The selected CLI must be installed and authenticated.
 
+Use `--agent <claude|opencode|codex|pi>` as an explicit alternative to the agent flags:
+
+```sh
+npx lstok --agent claude
+npx lstok --agent pi --provider anthropic --model claude-sonnet-4-6
+```
+
+Choose either `--agent` or one agent flag, not both. Both forms support the same options.
+
 Use `--model` to select a model. Values are passed unchanged to the agent CLI's `--model` flag, so use that CLI's model syntax:
 
 ```sh
@@ -102,7 +119,7 @@ npx lstok --claude --model sonnet
 npx lstok --pi --provider anthropic --model claude-sonnet-4-6
 ```
 
-`--provider` is supported only with `--pi` and is passed unchanged to Pi's `--provider` flag (use it with `--model`). OpenCode includes the provider in `--model` (`provider/model#variant`, with an optional variant). Codex and Claude Code do not have a general `--provider` flag. When omitted, the agent's configured defaults apply.
+`--provider` is supported only with `--pi` or `--agent pi` and is passed unchanged to Pi's `--provider` flag (use it with `--model`). OpenCode includes the provider in `--model` (`provider/model#variant`, with an optional variant). Codex and Claude Code do not have a general `--provider` flag. When omitted, the agent's configured defaults apply.
 
 The default question can be overridden via `--prompt`:
 

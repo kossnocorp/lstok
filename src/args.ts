@@ -15,6 +15,8 @@ export function parseArguments(args: string[]) {
     allowPositionals: true,
     options: {
       help: { type: "boolean", short: "h" },
+      file: { type: "string" },
+      agent: { type: "string" },
       opencode: { type: "boolean" },
       codex: { type: "boolean" },
       claude: { type: "boolean" },
@@ -43,13 +45,16 @@ export function parseArguments(args: string[]) {
 
   const selected = harnesses.filter((name) => values[name]);
 
-  if (selected.length > 1)
-    throw new Error("Choose only one harness: --opencode, --codex, --claude, or --pi.");
+  if (values.agent !== undefined && !harnesses.includes(values.agent as Harness))
+    throw new Error("--agent must be one of: claude, opencode, codex, pi.");
+
+  if (selected.length > 1 || (values.agent !== undefined && selected.length > 0))
+    throw new Error("Choose only one harness: --agent, --opencode, --codex, --claude, or --pi.");
 
   if (values.encoding && values.econding && values.encoding !== values.econding)
     throw new Error("--encoding and --econding must agree.");
 
-  const harness = selected[0];
+  const harness = (values.agent as Harness | undefined) ?? selected[0];
   const encoding = values.encoding ?? values.econding;
   const tokenizer = values.tokenizer ?? "tiktoken";
 
@@ -72,14 +77,19 @@ export function parseArguments(args: string[]) {
       (token) =>
         token.kind === "positional" && (separator === undefined || token.index < separator),
     );
-    if (hasPositionals || values.encoding !== undefined || values.econding !== undefined)
+    if (
+      hasPositionals ||
+      values.file !== undefined ||
+      values.encoding !== undefined ||
+      values.econding !== undefined
+    )
       throw new Error("Harness mode does not accept a file or encoding.");
 
     if (values.prompt !== undefined && !values.prompt.trim())
       throw new Error("--prompt must not be empty.");
 
     if (values.provider !== undefined && harness !== "pi")
-      throw new Error("--provider is only supported with --pi.");
+      throw new Error("--provider is only supported with --pi or --agent pi.");
 
     return {
       mode: "harness",
@@ -95,13 +105,18 @@ export function parseArguments(args: string[]) {
     } as const;
   }
 
-  if (values.tee) throw new Error("--tee requires --opencode, --codex, --claude, or --pi.");
+  if (values.tee)
+    throw new Error("--tee requires --agent, --opencode, --codex, --claude, or --pi.");
 
   if ((values.model !== undefined && values.api === undefined) || values.provider !== undefined)
-    throw new Error("--model requires --api or an agent; --provider requires --pi.");
+    throw new Error("--model requires --api or an agent; --provider requires --pi or --agent pi.");
+
+  if (values.file !== undefined && positionals.length)
+    throw new Error("Choose either a positional file or --file.");
 
   if (values.prompt !== undefined) {
-    if (positionals.length) throw new Error("Choose either a file or --prompt.");
+    if (positionals.length || values.file !== undefined)
+      throw new Error("Choose either a file or --prompt.");
 
     return {
       mode: "prompt",
@@ -116,11 +131,12 @@ export function parseArguments(args: string[]) {
     } as const;
   }
 
-  if (positionals.length !== 1) throw new Error("Usage: lstok <file> [--encoding <name>]");
+  if (values.file === undefined && positionals.length !== 1)
+    throw new Error("Usage: lstok (<file> | --file <path>) [--encoding <name>]");
 
   return {
     mode: "file",
-    file: positionals[0]!,
+    file: values.file ?? positionals[0]!,
     encoding: values.encoding ?? values.econding ?? defaultEncoding,
     tokenizer,
     api: values.api as Api | undefined,

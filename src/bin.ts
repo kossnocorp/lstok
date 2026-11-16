@@ -15,6 +15,8 @@ async function main() {
     case "help":
       console.log(`Usage:
   lstok <file> [--encoding <name>]
+  lstok --file <path> [--encoding <name>]
+  lstok --agent <claude|opencode|codex|pi> [--prompt <prompt>] [--model <model>]
   lstok --prompt <prompt> [--encoding <name>]
   lstok <file> --tokenizer <tiktoken|hf:owner/repo[@revision]|directory>
   lstok <file> --api <claude|gemini|openai> --model <model>
@@ -25,13 +27,15 @@ async function main() {
   lstok --pi [--prompt <prompt>] [--model <model>] [--provider <provider>]
 
 Options:
+  --file <path>      File to count (alternative to a positional path)
+  --agent <name>     Agent to run: claude, opencode, codex, pi
   --encoding <name>  Tiktoken encoding (default: o200k_base)
   --tokenizer <id>   tiktoken (default), hf:owner/repo[@revision], or local directory
   --api <provider>   Count via claude, gemini, or openai API (requires --model)
   --econding <name>  Alias for --encoding
   --prompt <prompt>  Text to count, or agent prompt (default: What is the project name?)
   --model <model>    API model ID, or model passed unchanged to the agent CLI
-  --provider <name>  Provider passed unchanged to Pi (--pi only)
+  --provider <name>  Provider passed unchanged to Pi (--pi or --agent pi only)
   --jq <filter>      Filter output through installed jq
   --jq-raw <filter>  Filter output through installed jq with raw string output
   --json            Print the full statistics schema instead of total tokens
