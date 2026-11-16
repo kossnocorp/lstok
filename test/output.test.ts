@@ -45,6 +45,14 @@ process.stdout.write(raw ? 'tokens: 42' : '"tokens: 42"\\n');
     expect(result.stderr).toBe("jq: invalid filter\n");
   });
 
+  it.each(["--jq", "--jq-raw"])("tees events before the %s result", (flag) => {
+    const result = runCli(["--codex", "--tee", "--json", flag, filter], directory);
+    expect(result.status).toBe(0);
+    const [event, ...output] = result.stdout.split("\n");
+    expect(JSON.parse(event!)).toHaveProperty("type", "turn.completed");
+    expect(output.join("\n")).toBe(flag === "--jq" ? '"tokens: 42"\n' : "tokens: 42");
+  });
+
   it("prints the total by default and a complete schema with --json", () => {
     expect(runCli(["--codex"], directory).stdout).toBe("44\n");
     const result = runCli(["--codex", "--json"], directory);

@@ -75,6 +75,26 @@ The default question can be overridden via `--prompt`:
 npx lstok --codex --prompt "Describe the project architecture"
 ```
 
+### Agent Arguments and Output
+
+Pass agent-specific arguments after `--`:
+
+```sh
+npx lstok --claude -- --permission-mode acceptEdits
+npx lstok --codex -- --sandbox read-only
+```
+
+Arguments are forwarded literally, after lstok's model/provider options and before the prompt. Keep the agent's required JSON output mode intact. Use lstok's `--model` and `--provider` options when you need metadata fallbacks; selections passed after `--` are only reflected in statistics if the agent reports them.
+
+Use `--tee` to stream raw agent stdout while collecting usage. Agent stderr is always forwarded to stderr. The final statistics are printed after the agent exits:
+
+```sh
+npx lstok --claude --tee --json
+npx lstok --codex --tee --jq '.total_input' -- --sandbox read-only
+```
+
+The streamed output contains the agent's JSON events, not its interactive terminal presentation. `--json`, `--jq`, and `--jq-raw` still apply only to the final statistics; with `--tee`, stdout is mixed output rather than a single parsable report.
+
 ### Statistics
 
 File, prompt, and agent modes print only the total token count by default. Use `--json` for the same full statistics schema in all modes:

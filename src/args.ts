@@ -7,8 +7,9 @@ export const harnesses = ["opencode", "codex", "claude", "pi"] as const;
 export type Harness = (typeof harnesses)[number];
 
 export function parseArguments(args: string[]) {
-  const { values, positionals } = parseArgs({
+  const { values, positionals, tokens } = parseArgs({
     args,
+    tokens: true,
     allowPositionals: true,
     options: {
       help: { type: "boolean", short: "h" },
@@ -23,6 +24,7 @@ export function parseArguments(args: string[]) {
       econding: { type: "string" },
       jq: { type: "string" },
       json: { type: "boolean" },
+      tee: { type: "boolean" },
       "jq-raw": { type: "string" },
     },
   });
@@ -46,7 +48,12 @@ export function parseArguments(args: string[]) {
   const harness = selected[0];
 
   if (harness) {
-    if (positionals.length || values.encoding !== undefined || values.econding !== undefined)
+    const separator = tokens.find((token) => token.kind === "option-terminator")?.index;
+    const hasPositionals = tokens.some(
+      (token) =>
+        token.kind === "positional" && (separator === undefined || token.index < separator),
+    );
+    if (hasPositionals || values.encoding !== undefined || values.econding !== undefined)
       throw new Error("Harness mode does not accept a file or encoding.");
 
     if (values.prompt !== undefined && !values.prompt.trim())
@@ -61,11 +68,15 @@ export function parseArguments(args: string[]) {
       prompt: values.prompt ?? defaultPrompt,
       model: values.model,
       provider: values.provider,
+      agentArgs: separator === undefined ? undefined : args.slice(separator + 1),
+      tee: values.tee,
       jq,
       jqRaw,
       json: values.json,
     } as const;
   }
+
+  if (values.tee) throw new Error("--tee requires --opencode, --codex, --claude, or --pi.");
 
   if (values.model !== undefined || values.provider !== undefined)
     throw new Error("--model and --provider require --opencode, --codex, --claude, or --pi.");

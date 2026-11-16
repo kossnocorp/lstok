@@ -8,6 +8,13 @@ This change log follows the format documented in [Keep a CHANGELOG].
 [semantic versioning]: http://semver.org/
 [keep a changelog]: http://keepachangelog.com/
 
+## Unreleased
+
+### Added
+
+- Add `--tee` to stream raw agent output alongside final statistics.
+- Forward arguments after `--` directly to the selected agent.
+
 ## v0.3.0 - 2026-10-16
 
 ### Added

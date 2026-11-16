@@ -27,9 +27,13 @@ Options:
   --jq <filter>      Filter output through installed jq
   --jq-raw <filter>  Filter output through installed jq with raw string output
   --json            Print the full statistics schema instead of total tokens
+  --tee             Stream raw agent output before the final statistics
+  -- <args...>      Pass remaining arguments directly to the selected agent
   -h, --help         Show help
 
 Harnesses run in the current directory with their installed configuration.
+--tee forwards agent stdout and stderr to their respective streams.
+With --tee, --json and --jq apply only to the final statistics.
 All modes print total tokens by default. --json prints the full schema.
 --jq and --jq-raw filter the full schema, even without --json.`);
       break;

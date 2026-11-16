@@ -183,6 +183,8 @@ export function createUsageCollector(harness: Harness) {
 export interface HarnessOptions {
   model?: string;
   provider?: string;
+  agentArgs?: string[];
+  tee?: boolean;
 }
 
 export function harnessArguments(harness: Harness, prompt: string, options: HarnessOptions = {}) {
@@ -192,6 +194,7 @@ export function harnessArguments(harness: Harness, prompt: string, options: Harn
     if (harness !== "pi") throw new Error("--provider is only supported with --pi.");
     args.push("--provider", options.provider);
   }
+  args.push(...(options.agentArgs ?? []));
 
   switch (harness) {
     case "opencode":
@@ -252,6 +255,7 @@ export async function runHarness(
       };
 
       child.stdout.on("data", (chunk: string) => {
+        if (options.tee) process.stdout.write(chunk);
         buffer += chunk;
 
         let newline: number;
