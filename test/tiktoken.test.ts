@@ -14,6 +14,7 @@ describe("tiktoken", () => {
       jqRaw: false,
       file: "AGENTS.md",
       encoding: "o200k_base",
+      tokenizer: "tiktoken",
     });
 
     for (const flag of ["--encoding", "--econding"])

@@ -1,6 +1,6 @@
 # lstok
 
-A simple CLI to count file tokens with [tiktoken] and measure AI coding agents' token usage in your project.
+A simple CLI to count file and prompt tokens with [tiktoken], Hugging Face tokenizers, or provider APIs, and measure AI coding agents' token usage in your project.
 
 Supports OpenCode, Codex, Claude Code, and Pi.
 
@@ -44,6 +44,41 @@ npx lstok --prompt "hello world"
 #=> 2
 npx lstok --prompt "hello world" --encoding cl100k_base --json
 ```
+
+### Choosing a Tokenizer
+
+`--tokenizer` defaults to `tiktoken`; `--encoding` selects its encoding (default: `o200k_base`).
+To use [Hugging Face tokenizers](https://github.com/huggingface/tokenizers.js), specify a Hub repository or a local directory containing `tokenizer.json` and `tokenizer_config.json`:
+
+```sh
+npx lstok AGENTS.md --tokenizer tiktoken --encoding cl100k_base
+npx lstok AGENTS.md --tokenizer hf:Qwen/Qwen3-8B
+npx lstok --prompt "hello world" --tokenizer ./my-tokenizer/
+```
+
+Hub selectors support `hf:owner/repo@revision`; use a commit hash for reproducible counts. Tokenizer files are downloaded on first use and cached in `$XDG_CACHE_HOME/lstok/tokenizers` (default: `~/.cache/lstok/tokenizers`). Cached files are reused without network requests, including for mutable revisions such as `main`; remove the corresponding cache file to refresh. Set `HF_TOKEN` for gated/private repositories you can access.
+
+Compatibility depends on the model's tokenizer components. No chat template or automatic beginning/end tokens are added. Literal special-token strings are handled according to the selected Hugging Face tokenizer's configuration; tiktoken treats them as ordinary text. `--encoding` applies only to tiktoken.
+
+### Counting Through Provider APIs
+
+Use `--api claude|gemini|openai` with an explicit API model ID:
+
+```sh
+npx lstok AGENTS.md --api claude --model claude-sonnet-4-6
+npx lstok --prompt "hello world" --api gemini --model gemini-2.5-flash
+npx lstok AGENTS.md --api openai --model gpt-5.4 --json
+```
+
+| API      | Environment variable                                           | Counting endpoint                    |
+| -------- | -------------------------------------------------------------- | ------------------------------------ |
+| `claude` | `ANTHROPIC_API_KEY`                                            | `/v1/messages/count_tokens`          |
+| `gemini` | `GOOGLE_API_KEY` or `GEMINI_API_KEY` (Google takes precedence) | `/v1beta/models/{model}:countTokens` |
+| `openai` | `OPENAI_API_KEY`                                               | `/v1/responses/input_tokens`         |
+
+The UTF-8 file contents or prompt are sent as one user message to the provider's counting endpoint. Counts can include message overhead and may differ from raw local token counts; Claude documents its counts as estimates. No generation request is made. Model availability is determined by the provider. `--api` cannot be combined with agent flags, `--tokenizer`, or `--encoding`.
+
+API mode supports the same plain count, `--json`, `--jq`, and `--jq-raw` output as local counting. `provider` is `anthropic`, `google`, or `openai`; `model` contains the requested model ID; `encoding` and `cost` are `null`. Input totals contain the returned count, and cache/output/reasoning counts are `0`. `time` measures the counting request through response parsing, excluding file reading.
 
 ### Measuring Agent Setup
 
@@ -120,13 +155,13 @@ Agent statistics cover the whole run, summed across model calls (or taken from t
 | `total`        | `total_input + total_output`                                 |
 | `provider`     | Reported provider, explicit selection, or `null`             |
 | `model`        | Reported model, explicit selection, or `null`                |
-| `encoding`     | Tiktoken encoding for files/prompts; `null` for agents       |
+| `encoding`     | Local encoding/tokenizer selector; `null` for APIs/agents    |
 
 All fields are always present in JSON. Missing counts, or breakdowns included in another count that cannot be separated, are `null`. Totals are calculated only when the required counts are available; otherwise they are `null` too.
 
-For file and prompt estimates, `input`, `total_input`, and `total` contain the token count. Cache, output, and reasoning counts are `0`; `cost`, `provider`, and `model` are `null`. `encoding` contains the selected encoding (default: `o200k_base`).
+For local file and prompt estimates, `input`, `total_input`, and `total` contain the token count. Cache, output, and reasoning counts are `0`; `cost`, `provider`, and `model` are `null`. `encoding` contains the selected tiktoken encoding (default: `o200k_base`) or Hugging Face tokenizer selector.
 
-`time` measures the full agent process run through exit. For files and prompts, it measures only token encoding, excluding file reading and encoder setup.
+`time` measures the full agent process run through exit. For local files and prompts, it measures only token encoding, excluding file reading, downloads, and encoder setup.
 
 Agent-reported metadata takes precedence over explicit CLI selections. Multiple reported models or providers produce `null` for the corresponding field. OpenCode's explicit `provider/model` selection also supplies the provider; configured defaults that aren't reported remain `null`. Model selections are preserved verbatim when used as a fallback.
 

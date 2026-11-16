@@ -2,6 +2,8 @@ import { parseArgs } from "node:util";
 
 export const defaultPrompt = "What is the project name?";
 export const defaultEncoding = "o200k_base";
+export const apis = ["claude", "gemini", "openai"] as const;
+export type Api = (typeof apis)[number];
 export const harnesses = ["opencode", "codex", "claude", "pi"] as const;
 
 export type Harness = (typeof harnesses)[number];
@@ -21,6 +23,8 @@ export function parseArguments(args: string[]) {
       model: { type: "string" },
       provider: { type: "string" },
       encoding: { type: "string" },
+      tokenizer: { type: "string" },
+      api: { type: "string" },
       econding: { type: "string" },
       jq: { type: "string" },
       json: { type: "boolean" },
@@ -46,8 +50,23 @@ export function parseArguments(args: string[]) {
     throw new Error("--encoding and --econding must agree.");
 
   const harness = selected[0];
+  const encoding = values.encoding ?? values.econding;
+  const tokenizer = values.tokenizer ?? "tiktoken";
+
+  if (!tokenizer.trim()) throw new Error("--tokenizer must not be empty.");
+  if (values.api !== undefined && !apis.includes(values.api as Api))
+    throw new Error("--api must be claude, gemini, or openai.");
+  if (values.api !== undefined) {
+    if (harness || encoding !== undefined || values.tokenizer !== undefined)
+      throw new Error("--api cannot be combined with an agent, --encoding, or --tokenizer.");
+    if (!values.model?.trim()) throw new Error("--api requires --model.");
+  }
+  if (tokenizer !== "tiktoken" && encoding !== undefined)
+    throw new Error("--encoding is only supported with --tokenizer tiktoken.");
 
   if (harness) {
+    if (values.tokenizer !== undefined)
+      throw new Error("Harness mode does not accept --tokenizer.");
     const separator = tokens.find((token) => token.kind === "option-terminator")?.index;
     const hasPositionals = tokens.some(
       (token) =>
@@ -78,8 +97,8 @@ export function parseArguments(args: string[]) {
 
   if (values.tee) throw new Error("--tee requires --opencode, --codex, --claude, or --pi.");
 
-  if (values.model !== undefined || values.provider !== undefined)
-    throw new Error("--model and --provider require --opencode, --codex, --claude, or --pi.");
+  if ((values.model !== undefined && values.api === undefined) || values.provider !== undefined)
+    throw new Error("--model requires --api or an agent; --provider requires --pi.");
 
   if (values.prompt !== undefined) {
     if (positionals.length) throw new Error("Choose either a file or --prompt.");
@@ -88,6 +107,9 @@ export function parseArguments(args: string[]) {
       mode: "prompt",
       prompt: values.prompt,
       encoding: values.encoding ?? values.econding ?? defaultEncoding,
+      tokenizer,
+      api: values.api as Api | undefined,
+      model: values.model,
       jq,
       jqRaw,
       json: values.json,
@@ -100,6 +122,9 @@ export function parseArguments(args: string[]) {
     mode: "file",
     file: positionals[0]!,
     encoding: values.encoding ?? values.econding ?? defaultEncoding,
+    tokenizer,
+    api: values.api as Api | undefined,
+    model: values.model,
     jq,
     jqRaw,
     json: values.json,

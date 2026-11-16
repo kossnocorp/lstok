@@ -12,6 +12,8 @@ This change log follows the format documented in [Keep a CHANGELOG].
 
 ### Added
 
+- Add `--tokenizer` for cached Hugging Face Hub and local tokenizers, with tiktoken as the default.
+- Add `--api claude|gemini|openai` to count file and prompt tokens with provider APIs and environment-based authentication.
 - Add `--tee` to stream raw agent output alongside final statistics.
 - Forward arguments after `--` directly to the selected agent.
 

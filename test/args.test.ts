@@ -48,6 +48,15 @@ describe("arguments", () => {
     ["--codex", "--jq-raw"],
     ["--codex", "--jq", ".", "--jq-raw", "."],
     ["a", "--encoding", "gpt2", "--econding", "cl100k_base"],
+    ["a", "--api", "unknown", "--model", "x"],
+    ["a", "--api", "claude"],
+    ["a", "--api", "claude", "--model", " "],
+    ["--claude", "--api", "claude", "--model", "x"],
+    ["a", "--api", "claude", "--model", "x", "--encoding", "o200k_base"],
+    ["a", "--api", "claude", "--model", "x", "--tokenizer", "tiktoken"],
+    ["a", "--tokenizer", "hf:Qwen/Qwen3-8B", "--encoding", "o200k_base"],
+    ["a", "--tokenizer", ""],
+    ["--claude", "--tokenizer", "tiktoken"],
   ])("rejects invalid arguments %j", (...args) => {
     expect(() => parseArguments(args)).toThrow();
   });
